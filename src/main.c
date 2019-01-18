@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#define MAX_SIZE_LINE_LENGTH 100
+#include <ctype.h>
 
 int main(void) {
     char *line = NULL;
@@ -40,9 +39,15 @@ int main(void) {
         }
         char *p = words[i];
         for (unsigned int j = 0; j < n; ++j) {
-            if (p[j] == '\n') {
+            char c = p[j];
+            if (c == '\n') {
                 p[j] = '\0';
                 break;
+            } else if (!isupper(c)) {
+                fprintf(
+                    stderr, "word %u: '%c' is not uppercase\n", i, c
+                );
+                exit(1);
             }
         }
     }
@@ -64,6 +69,11 @@ int main(void) {
             if (c == EOF || c == '\n') {
                 fprintf(stderr, "row %u: too few columns (read %u)\n", i, j);
                 exit(1);
+            } else if (!isupper(c)) {
+                fprintf(
+                    stderr, "row %u, col %u: '%c' is not uppercase\n", i, j, c
+                );
+                exit(1);
             }
         }
         c = fgetc(stdin);
@@ -80,4 +90,5 @@ int main(void) {
         free(words[i]);
     }
     free(words);
+    return 0;
 }
