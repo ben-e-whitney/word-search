@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "linked_list.h"
 #include "word_match.h"
 
 int main(void) {
@@ -99,11 +100,14 @@ int main(void) {
         ++letter_counts[j];
     }
 
-    for (unsigned int i = 0; i < nrows; ++i) {
+    struct LinkedList *matches = malloc(sizeof(*matches));
+    matches->first = NULL;
+    matches->last = NULL;
+    for (unsigned int row = 0; row < nrows; ++row) {
         int c;
         c = fgetc(stdin);
         if (c == EOF) {
-            fprintf(stderr, "too few rows (read %u)\n", i);
+            fprintf(stderr, "too few rows (read %u)\n", row);
             exit(1);
         }
         int d = ungetc(c, stdin);
@@ -111,28 +115,61 @@ int main(void) {
             fprintf(stderr, "failed to push back character '%c'\n", c);
             exit(1);
         }
-        for (unsigned int j = 0; j < ncols; ++j) {
+        for (unsigned int col = 0; col < ncols; ++col) {
             c = fgetc(stdin);
             if (c == EOF || c == '\n') {
-                fprintf(stderr, "row %u: too few columns (read %u)\n", i, j);
+                fprintf(
+                    stderr, "row %u: too few columns (read %u)\n", row, col
+                );
                 exit(1);
             } else if (!isupper(c)) {
                 fprintf(
-                    stderr, "row %u, col %u: '%c' is not uppercase\n", i, j, c
+                    stderr,
+                    "row %u, col %u: '%c' is not uppercase\n",
+                    row, col, c
                 );
                 exit(1);
             }
-            unsigned int k = c - 'A';
+            const unsigned int j = c - 'A';
+            const struct WordMatchStarter * const p = letter_starts[j];
+            const unsigned int K = letter_counts[j];
+            for (unsigned int k = 0; k < K; ++k) {
+                const struct WordMatchStarter *p = letter_starts[j] + k;
+                unsigned char room_west = 1 + col >= p->length;
+                unsigned char room_south = row + p->length <= nrows;
+                unsigned char room_east = col + p->length <= ncols;
+                if (room_west && room_south) {
+                    struct WordMatch *m = malloc(sizeof(*m));
+                    initialize_word_match(m, p, row, col, SOUTHWEST);
+                    add_element(matches, m);
+                }
+                if (room_south) {
+                    struct WordMatch *m = malloc(sizeof(*m));
+                    initialize_word_match(m, p, row, col, SOUTH);
+                    add_element(matches, m);
+                }
+                if (room_south && room_east) {
+                    struct WordMatch *m = malloc(sizeof(*m));
+                    initialize_word_match(m, p, row, col, SOUTHEAST);
+                    add_element(matches, m);
+                }
+                if (room_east) {
+                    struct WordMatch *m = malloc(sizeof(*m));
+                    initialize_word_match(m, p, row, col, EAST);
+                    add_element(matches, m);
+                }
+            }
         }
         c = fgetc(stdin);
         if (c == EOF) {
-            fprintf(stderr, "row %u: row doesn't end in a newline\n", i);
+            fprintf(stderr, "row %u: row doesn't end in a newline\n", row);
             exit(1);
         } else if (c != '\n') {
-            fprintf(stderr, "row %u: too many columns\n", i);
+            fprintf(stderr, "row %u: too many columns\n", row);
             exit(1);
         }
     }
+    free(matches);
 
     for (unsigned int i = 0; i < nwords; ++i) {
         free(words[i]);
