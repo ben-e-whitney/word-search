@@ -3,34 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 
-struct WordMatchStarter {
-    const char *word;
-    size_t length;
-    const char *start;
-    signed char step;
-};
-
-void initialize_word_match_starter(
-    struct WordMatchStarter * const p,
-    const char * const word,
-    const size_t length,
-    const char * const start,
-    const signed char step
-    ) {
-    p->word = word;
-    p->length = length;
-    p->start = start;
-    p->step = step;
-}
-
-enum direction {SOUTHWEST, SOUTH, SOUTHEAST, EAST};
-
-struct WordMatch {
-    struct WordMatchStarter * const starter;
-    unsigned int row;
-    unsigned int col;
-    enum direction heading;
-};
+#include "word_match.h"
 
 int main(void) {
     char *line = NULL;
@@ -58,15 +31,13 @@ int main(void) {
     }
     free(line);
 
-    struct WordMatchStarter *starters = (struct WordMatchStarter *) malloc(
-        2 * nwords * sizeof(struct WordMatchStarter)
-    );
+    struct WordMatchStarter *starters = malloc(2 * nwords * sizeof(*starters));
     unsigned int letter_counts[26];
     for (unsigned int i = 0; i < 26; ++i) {
         letter_counts[i] = 0;
     }
 
-    char ** const words = (char ** const) malloc(nwords * sizeof(char *));
+    char ** const words = malloc(nwords * sizeof(*words));
     for (unsigned int i = 0; i < nwords; ++i) {
         words[i] = NULL;
         size_t n = 0;
