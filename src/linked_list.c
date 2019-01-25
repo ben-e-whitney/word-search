@@ -3,7 +3,9 @@
 #include "linked_list.h"
 #include "word_match.h"
 
-void add_element(struct LinkedList * const list, struct WordMatch * const m) {
+void linked_list_add(
+    struct LinkedList * const list, struct WordMatch * const m
+) {
     if (list == NULL) {
         fprintf(stderr, "attempt to add to null list\n");
         exit(1);
@@ -25,7 +27,7 @@ void add_element(struct LinkedList * const list, struct WordMatch * const m) {
     list->last = l;
 }
 
-void remove_element(
+void linked_list_remove(
         struct LinkedList * const list,
         struct LinkedListElement * const element
 ) {

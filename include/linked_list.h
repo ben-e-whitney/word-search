@@ -8,12 +8,15 @@ struct LinkedListElement {
     const struct WordMatch * match;
     struct LinkedListElement *next;
 };
+
 struct LinkedList {
     struct LinkedListElement * first;
     struct LinkedListElement * last;
 };
-void add_element(struct LinkedList * const, struct WordMatch * const);
-void remove_element(
+
+void linked_list_add(struct LinkedList * const, struct WordMatch * const);
+
+void linked_list_remove(
     struct LinkedList * const,
     struct LinkedListElement * const
 );

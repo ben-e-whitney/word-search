@@ -100,9 +100,7 @@ int main(void) {
         ++letter_counts[j];
     }
 
-    struct LinkedList *matches = malloc(sizeof(*matches));
-    matches->first = NULL;
-    matches->last = NULL;
+    struct LinkedList matches = {.first = NULL, .last = NULL};
     for (unsigned int row = 0; row < nrows; ++row) {
         int c;
         c = fgetc(stdin);
@@ -141,22 +139,22 @@ int main(void) {
                 if (room_west && room_south) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, SOUTHWEST);
-                    add_element(matches, m);
+                    linked_list_add(&matches, m);
                 }
                 if (room_south) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, SOUTH);
-                    add_element(matches, m);
+                    linked_list_add(&matches, m);
                 }
                 if (room_south && room_east) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, SOUTHEAST);
-                    add_element(matches, m);
+                    linked_list_add(&matches, m);
                 }
                 if (room_east) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, EAST);
-                    add_element(matches, m);
+                    linked_list_add(&matches, m);
                 }
             }
         }
@@ -169,7 +167,6 @@ int main(void) {
             exit(1);
         }
     }
-    free(matches);
 
     for (unsigned int i = 0; i < nwords; ++i) {
         free(words[i]);
