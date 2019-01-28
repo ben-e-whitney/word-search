@@ -17,6 +17,8 @@ void circle_finalize(struct Circle * const);
 
 void circle_advance(struct Circle * const);
 
-struct LinkedList * const circle_at(struct Circle * const, const size_t);
+struct LinkedList * const circle_at(
+    struct Circle * const, const enum Direction
+);
 
 #endif

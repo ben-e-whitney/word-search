@@ -18,7 +18,7 @@ void initialize_word_match(
     const struct WordMatchStarter * const starter,
     const unsigned int row,
     const unsigned int col,
-    const enum direction heading
+    const enum Direction heading
 ) {
     p->starter = starter;
     p->row = row;

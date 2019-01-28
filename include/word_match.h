@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#include "direction.h"
+
 struct WordMatchStarter {
     const char *word;
     size_t length;
@@ -18,13 +20,11 @@ void initialize_word_match_starter(
     const signed char step
     );
 
-enum direction {SOUTHWEST, SOUTH, SOUTHEAST, EAST};
-
 struct WordMatch {
     const struct WordMatchStarter * starter;
     unsigned int row;
     unsigned int col;
-    enum direction heading;
+    enum Direction heading;
 };
 
 void initialize_word_match(
@@ -32,7 +32,7 @@ void initialize_word_match(
     const struct WordMatchStarter * const starter,
     const unsigned int row,
     const unsigned int col,
-    const enum direction heading
+    const enum Direction heading
 );
 
 #endif

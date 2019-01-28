@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "circle.h"
+#include "direction.h"
 #include "linked_list.h"
 #include "word_match.h"
 
