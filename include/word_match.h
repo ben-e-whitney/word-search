@@ -35,4 +35,12 @@ void initialize_word_match(
     const enum Direction heading
 );
 
+char word_match_expected(
+    const struct WordMatch * const, const unsigned int, const unsigned int
+);
+
+unsigned char word_match_finished(
+    const struct WordMatch * const, const unsigned int, const unsigned int
+);
+
 #endif

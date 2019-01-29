@@ -3,23 +3,26 @@
 #include "circle.h"
 
 struct Circle circle_initialize(const size_t length) {
-    struct LinkedList *p = malloc(length * sizeof(*p));
+    struct Vector *p = malloc(length * sizeof(*p));
     if (p == NULL) {
         fprintf(stderr, "failed to allocate memory for circle\n");
     }
     for (size_t i = 0; i < length; ++i) {
-        struct LinkedList *q = p + i;
-        q->last = q->first = NULL;
+        struct Vector * const q = p + i;
+        *q = vector_initialize();
     }
     return (struct Circle) {.start = p, .current = p, .length = length};
 }
 
 void circle_finalize(struct Circle * const c) {
+    for (size_t i = 0; i < c->length; ++i) {
+        vector_finalize(c->start + i);
+    }
     free(c->start);
     c->current = NULL;
 }
 
-static struct LinkedList * const circle_at_n_hence(
+static struct Vector * const circle_at_n_hence(
     struct Circle * const c, const size_t n
 ) {
     return c->length ?
@@ -33,7 +36,7 @@ void circle_advance(struct Circle * const c) {
 
 /*This assumes that `c->length` is sufficiently large and it doesn't do any*/
 /*error checking about `heading`.*/
-struct LinkedList * const circle_at(
+struct Vector * const circle_at(
     struct Circle * const c, enum Direction heading
 ) {
     size_t n = 0;

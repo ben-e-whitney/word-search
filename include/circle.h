@@ -3,11 +3,11 @@
 
 #include <stddef.h>
 
-#include "linked_list.h"
+#include "vector.h"
 
 struct Circle {
-    struct LinkedList * const start;
-    struct LinkedList * current;
+    struct Vector * const start;
+    struct Vector * current;
     const size_t length;
 };
 
@@ -17,7 +17,7 @@ void circle_finalize(struct Circle * const);
 
 void circle_advance(struct Circle * const);
 
-struct LinkedList * const circle_at(
+struct Vector * const circle_at(
     struct Circle * const, const enum Direction
 );
 
