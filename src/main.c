@@ -5,8 +5,44 @@
 
 #include "circle.h"
 #include "direction.h"
-#include "linked_list.h"
 #include "word_match.h"
+
+#define SWAP(T, a, b) do {T tmp = a; a = b; b = tmp;} while (0)
+
+void report_match(const struct WordMatch * const m) {
+    const struct WordMatchStarter * const s = m->starter;
+    signed char row_step = 0;
+    signed char col_step = 0;
+    switch (m->heading) {
+        case (SOUTHWEST):
+            row_step = 1;
+            col_step = -1;
+            break;
+        case (SOUTH):
+            row_step = 1;
+            break;
+        case (SOUTHEAST):
+            row_step = 1;
+            col_step = 1;
+            break;
+        case (EAST):
+            col_step = 1;
+            break;
+    }
+    unsigned int row_start = m->row;
+    unsigned int col_start = m->col;
+    unsigned int row_end = row_start + row_step * (ssize_t) (s->length - 1);
+    unsigned int col_end = col_start + col_step * (ssize_t) (s->length - 1);
+    if (s->step == -1) {
+        SWAP(unsigned int, row_start, row_end);
+        SWAP(unsigned int, col_start, col_end);
+    }
+    fprintf(
+        stdout,
+        "%s from (%u, %u) to (%u, %u)\n",
+        m->starter->word, row_start, col_start, row_end, col_end
+    );
+}
 
 int main(void) {
     char *line = NULL;
@@ -102,7 +138,7 @@ int main(void) {
         ++letter_counts[j];
     }
 
-    struct LinkedList matches = {.first = NULL, .last = NULL};
+    struct Circle todo = circle_initialize(ncols + 2);
     for (unsigned int row = 0; row < nrows; ++row) {
         int c;
         c = fgetc(stdin);
@@ -131,8 +167,11 @@ int main(void) {
                 exit(1);
             }
             const unsigned int j = c - 'A';
-            const struct WordMatchStarter * const p = letter_starts[j];
             const unsigned int K = letter_counts[j];
+            struct Vector * const todo_sw = circle_at(&todo, SOUTHWEST);
+            struct Vector * const todo_so = circle_at(&todo, SOUTH);
+            struct Vector * const todo_se = circle_at(&todo, SOUTHEAST);
+            struct Vector * const todo_ea = circle_at(&todo, EAST);
             for (unsigned int k = 0; k < K; ++k) {
                 const struct WordMatchStarter *p = letter_starts[j] + k;
                 unsigned char room_west = 1 + col >= p->length;
@@ -141,24 +180,57 @@ int main(void) {
                 if (room_west && room_south) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, SOUTHWEST);
-                    linked_list_add(&matches, m);
+                    vector_append(todo_sw, *m);
+                    free(m);
                 }
                 if (room_south) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, SOUTH);
-                    linked_list_add(&matches, m);
+                    vector_append(todo_so, *m);
+                    free(m);
                 }
                 if (room_south && room_east) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, SOUTHEAST);
-                    linked_list_add(&matches, m);
+                    vector_append(todo_se, *m);
+                    free(m);
                 }
                 if (room_east) {
                     struct WordMatch *m = malloc(sizeof(*m));
                     initialize_word_match(m, p, row, col, EAST);
-                    linked_list_add(&matches, m);
+                    vector_append(todo_ea, *m);
+                    free(m);
                 }
             }
+            struct Vector * const todo_he = todo.current;
+            for (size_t i = 0; i < todo_he->length; ++i) {
+                const struct WordMatch * const m = todo_he->first + i;
+                const char expected = word_match_expected(m, row, col);
+                if (c == expected) {
+                    if (word_match_finished(m, row, col)) {
+                        report_match(m);
+                    } else {
+                        struct Vector * v = NULL;
+                        switch (m->heading) {
+                            case (SOUTHWEST):
+                                v = todo_sw;
+                                break;
+                            case (SOUTH):
+                                v = todo_so;
+                                break;
+                            case (SOUTHEAST):
+                                v = todo_se;
+                                break;
+                            case (EAST):
+                                v = todo_ea;
+                                break;
+                        }
+                        vector_append(v, *m);
+                    }
+                }
+            }
+            vector_clear(todo_he);
+            circle_advance(&todo);
         }
         c = fgetc(stdin);
         if (c == EOF) {
@@ -170,6 +242,7 @@ int main(void) {
         }
     }
 
+    circle_finalize(&todo);
     for (unsigned int i = 0; i < nwords; ++i) {
         free(words[i]);
     }
