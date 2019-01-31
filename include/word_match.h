@@ -12,7 +12,7 @@ struct WordMatchStarter {
     signed char step;
 };
 
-void initialize_word_match_starter(
+void word_match_starter_initialize(
     struct WordMatchStarter * const p,
     const char * const word,
     const size_t length,
@@ -26,14 +26,6 @@ struct WordMatch {
     unsigned int col;
     enum Direction heading;
 };
-
-void initialize_word_match(
-    struct WordMatch * const p,
-    const struct WordMatchStarter * const starter,
-    const unsigned int row,
-    const unsigned int col,
-    const enum Direction heading
-);
 
 char word_match_expected(
     const struct WordMatch * const, const unsigned int, const unsigned int

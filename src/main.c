@@ -128,13 +128,13 @@ int main(void) {
         start = word;
         j = *start - 'A';
         p = letter_starts[j] + letter_counts[j];
-        initialize_word_match_starter(p, word, length, start, 1);
+        word_match_starter_initialize(p, word, length, start, 1);
         ++letter_counts[j];
 
         start = word + (length - 1);
         j = *start - 'A';
         p = letter_starts[j] + letter_counts[j];
-        initialize_word_match_starter(p, word, length, start, -1);
+        word_match_starter_initialize(p, word, length, start, -1);
         ++letter_counts[j];
     }
 
@@ -178,28 +178,48 @@ int main(void) {
                 unsigned char room_south = row + p->length <= nrows;
                 unsigned char room_east = col + p->length <= ncols;
                 if (room_west && room_south) {
-                    struct WordMatch *m = malloc(sizeof(*m));
-                    initialize_word_match(m, p, row, col, SOUTHWEST);
-                    vector_append(todo_sw, *m);
-                    free(m);
+                    vector_append(
+                        todo_sw,
+                        (struct WordMatch) {
+                            .starter = p,
+                            .row = row,
+                            .col = col,
+                            .heading = SOUTHWEST
+                        }
+                    );
                 }
                 if (room_south) {
-                    struct WordMatch *m = malloc(sizeof(*m));
-                    initialize_word_match(m, p, row, col, SOUTH);
-                    vector_append(todo_so, *m);
-                    free(m);
+                    vector_append(
+                        todo_so,
+                        (struct WordMatch) {
+                            .starter = p,
+                            .row = row,
+                            .col = col,
+                            .heading = SOUTH
+                        }
+                    );
                 }
                 if (room_south && room_east) {
-                    struct WordMatch *m = malloc(sizeof(*m));
-                    initialize_word_match(m, p, row, col, SOUTHEAST);
-                    vector_append(todo_se, *m);
-                    free(m);
+                    vector_append(
+                        todo_se,
+                        (struct WordMatch) {
+                            .starter = p,
+                            .row = row,
+                            .col = col,
+                            .heading = SOUTHEAST
+                        }
+                    );
                 }
                 if (room_east) {
-                    struct WordMatch *m = malloc(sizeof(*m));
-                    initialize_word_match(m, p, row, col, EAST);
-                    vector_append(todo_ea, *m);
-                    free(m);
+                    vector_append(
+                        todo_ea,
+                        (struct WordMatch) {
+                            .starter = p,
+                            .row = row,
+                            .col = col,
+                            .heading = EAST
+                        }
+                    );
                 }
             }
             struct Vector * const todo_he = todo.current;
@@ -247,5 +267,6 @@ int main(void) {
         free(words[i]);
     }
     free(words);
+    free(starters);
     return 0;
 }
