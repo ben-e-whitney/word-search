@@ -70,7 +70,9 @@ int main(void) {
     }
     free(line);
 
-    struct WordMatchStarter *starters = malloc(2 * nwords * sizeof(*starters));
+    struct WordMatchStarter * const starters = malloc(
+        2 * nwords * sizeof(*starters)
+    );
     unsigned int letter_counts[26];
     for (unsigned int i = 0; i < 26; ++i) {
         letter_counts[i] = 0;
@@ -168,58 +170,30 @@ int main(void) {
             }
             const unsigned int j = c - 'A';
             const unsigned int K = letter_counts[j];
-            struct Vector * const todo_sw = circle_at(&todo, SOUTHWEST);
-            struct Vector * const todo_so = circle_at(&todo, SOUTH);
-            struct Vector * const todo_se = circle_at(&todo, SOUTHEAST);
-            struct Vector * const todo_ea = circle_at(&todo, EAST);
+            struct Vector * neighboring_todos[NUMBER_OF_DIRECTIONS];
+            for (unsigned char i = 0; i < NUMBER_OF_DIRECTIONS; ++i) {
+                neighboring_todos[i] = circle_at(&todo, (enum Direction) i);
+            }
             for (unsigned int k = 0; k < K; ++k) {
                 const struct WordMatchStarter *p = letter_starts[j] + k;
-                unsigned char room_west = 1 + col >= p->length;
-                unsigned char room_south = row + p->length <= nrows;
-                unsigned char room_east = col + p->length <= ncols;
-                if (room_west && room_south) {
-                    vector_append(
-                        todo_sw,
-                        (struct WordMatch) {
-                            .starter = p,
-                            .row = row,
-                            .col = col,
-                            .heading = SOUTHWEST
-                        }
-                    );
-                }
-                if (room_south) {
-                    vector_append(
-                        todo_so,
-                        (struct WordMatch) {
-                            .starter = p,
-                            .row = row,
-                            .col = col,
-                            .heading = SOUTH
-                        }
-                    );
-                }
-                if (room_south && room_east) {
-                    vector_append(
-                        todo_se,
-                        (struct WordMatch) {
-                            .starter = p,
-                            .row = row,
-                            .col = col,
-                            .heading = SOUTHEAST
-                        }
-                    );
-                }
-                if (room_east) {
-                    vector_append(
-                        todo_ea,
-                        (struct WordMatch) {
-                            .starter = p,
-                            .row = row,
-                            .col = col,
-                            .heading = EAST
-                        }
-                    );
+                unsigned char room[NUMBER_OF_DIRECTIONS];
+                room[SOUTH] = row + p->length <= nrows;
+                room[EAST] = col + p->length <= ncols;
+                room[SOUTHEAST] = room[SOUTH] && room[EAST];
+                /*Second term would be `room[WEST]`.*/
+                room[SOUTHWEST] = room[SOUTH] && (1 + col >= p->length);
+                for (unsigned char i = 0; i < NUMBER_OF_DIRECTIONS; ++i) {
+                    if (room[i]) {
+                        vector_append(
+                            neighboring_todos[i],
+                            (struct WordMatch) {
+                                .starter = p,
+                                .row = row,
+                                .col = col,
+                                .heading = (enum Direction) i
+                            }
+                        );
+                    }
                 }
             }
             struct Vector * const todo_he = todo.current;
@@ -230,22 +204,7 @@ int main(void) {
                     if (word_match_finished(m, row, col)) {
                         report_match(m);
                     } else {
-                        struct Vector * v = NULL;
-                        switch (m->heading) {
-                            case (SOUTHWEST):
-                                v = todo_sw;
-                                break;
-                            case (SOUTH):
-                                v = todo_so;
-                                break;
-                            case (SOUTHEAST):
-                                v = todo_se;
-                                break;
-                            case (EAST):
-                                v = todo_ea;
-                                break;
-                        }
-                        vector_append(v, *m);
+                        vector_append(neighboring_todos[m->heading], *m);
                     }
                 }
             }
